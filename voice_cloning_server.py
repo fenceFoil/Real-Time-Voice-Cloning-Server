@@ -18,9 +18,9 @@ app = Flask(__name__)
 @app.route("/clone_voices", methods=["POST"])
 def run_voice_cloning():
     ## Model locations
-    enc_model_fpath = "encoder/saved_models/pretrained.pt"
-    syn_model_dir = "synthesizer/saved_models/logs-pretrained/"
-    voc_model_fpath = "vocoder/saved_models/pretrained/pretrained.pt"
+    enc_model_fpath = Path("encoder/saved_models/pretrained.pt")
+    syn_model_dir = Path("synthesizer/saved_models/logs-pretrained/")
+    voc_model_fpath = Path("vocoder/saved_models/pretrained/pretrained.pt")
     ref_voice_path = request.json["voiceFile"] # filename like ojo3.wav
     messages = request.json["messages"] # array of strings
 
