@@ -56,30 +56,31 @@ def run_voice_cloning():
     synthesizer = Synthesizer(syn_model_dir.joinpath("taco_pretrained"), low_mem=False)
     vocoder.load_model(voc_model_fpath)
         
+    in_fpath = Path(ref_voice_path)
+    
+    print("Computing the embedding")
+    ## Computing the embedding
+    # First, we load the wav using the function that the speaker encoder provides. This is 
+    # important: there is preprocessing that must be applied.
+    
+    # The following two methods are equivalent:
+    # - Directly load from the filepath:
+    preprocessed_wav = encoder.preprocess_wav(in_fpath)
+    # - If the wav is already loaded:
+    original_wav, sampling_rate = librosa.load(in_fpath)
+    preprocessed_wav = encoder.preprocess_wav(original_wav, sampling_rate)
+    print("Loaded file succesfully")
+    
+    # Then we derive the embedding. There are many functions and parameters that the 
+    # speaker encoder interfaces. These are mostly for in-depth research. You will typically
+    # only use this function (with its default parameters):
+    embed = encoder.embed_utterance(preprocessed_wav)
+    print("Created the embedding")
+
     print("Generation loop")
     num_generated = 0
     for text in messages:
         try:
-            in_fpath = Path(ref_voice_path)
-            
-            
-            ## Computing the embedding
-            # First, we load the wav using the function that the speaker encoder provides. This is 
-            # important: there is preprocessing that must be applied.
-            
-            # The following two methods are equivalent:
-            # - Directly load from the filepath:
-            preprocessed_wav = encoder.preprocess_wav(in_fpath)
-            # - If the wav is already loaded:
-            original_wav, sampling_rate = librosa.load(in_fpath)
-            preprocessed_wav = encoder.preprocess_wav(original_wav, sampling_rate)
-            print("Loaded file succesfully")
-            
-            # Then we derive the embedding. There are many functions and parameters that the 
-            # speaker encoder interfaces. These are mostly for in-depth research. You will typically
-            # only use this function (with its default parameters):
-            embed = encoder.embed_utterance(preprocessed_wav)
-            print("Created the embedding")
             
             
             ## Generating the spectrogram
