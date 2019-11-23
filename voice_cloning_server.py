@@ -8,13 +8,14 @@ import numpy as np
 import librosa
 import torch
 import sys
+import os
 import shutil
 
 # Set up server
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 app = Flask(__name__)
 
-@app.path("/clone_voices", methods=["POST"])
+@app.route("/clone_voices", methods=["POST"])
 def run_voice_cloning():
     ## Model locations
     enc_model_fpath = "encoder/saved_models/pretrained.pt"
@@ -35,7 +36,7 @@ def run_voice_cloning():
               "for deep learning, ensure that the drivers are properly installed, and that your "
               "CUDA version matches your PyTorch installation. CPU-only inference is currently "
               "not supported.", file=sys.stderr)
-        return flask.abort(500)
+        return abort(500)
     device_id = torch.cuda.current_device()
     gpu_properties = torch.cuda.get_device_properties(device_id)
     print("Found %d GPUs available. Using GPU %d (%s) of compute capability %d.%d with "
