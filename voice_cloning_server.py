@@ -26,7 +26,8 @@ def run_voice_cloning():
 
     # Clear destination folder of generated sound files
     output_path = "output/"
-    shutil.rmtree(output_path)
+    if os.path.exists(output_path):
+        shutil.rmtree(output_path)
     os.mkdir(output_path)
     
     ## Print some environment information (for debugging purposes)
