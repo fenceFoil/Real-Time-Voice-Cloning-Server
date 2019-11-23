@@ -171,4 +171,6 @@ def run_voice_cloning():
         except Exception as e:
             print("Caught exception: %s" % repr(e))
             print("Restarting\n")
+
+    return str(num_generated)
         
