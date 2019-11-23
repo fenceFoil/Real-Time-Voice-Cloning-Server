@@ -50,7 +50,7 @@ def run_voice_cloning():
     
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
-    encoder.load_modelenc_model_fpath)
+    encoder.load_model(enc_model_fpath)
     synthesizer = Synthesizer(syn_model_dir.joinpath("taco_pretrained"), low_mem=False)
     vocoder.load_model(voc_model_fpath)
     
