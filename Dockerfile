@@ -1,9 +1,9 @@
 # Install Nvidia-Docker from https://github.com/NVIDIA/nvidia-docker
-# sudo docker build -t voice-clone-service .
-# sudo docker run -it --gpus=all -p 5000:5000 -v $PWD/wavs:/wavs voice-clone-service
+# sudo docker build -t voice-clone-service:v1 .
+# sudo docker run -it --gpus=all -p 5000:5000 -v $PWD/wavs:/wavs voice-clone-service:v1
 # Puts wavs in wavs folder
 # Call API to generate
-# curl --location --request POST 'localhost:5000/clone_voices' --header 'Content-Type: application/json' --header 'Content-Type: text/plain' --data-raw '{"voiceFile": "/wavs/weapon.wav","messages": ["MAKE ME BUTTER"]}'
+# curl --location --request POST 'localhost:5000/clone_voices' --header 'Content-Type: application/json' --header 'Content-Type: text/plain' --data-raw '{"voiceFile": "/wavs/weapon.wav", "messages": [""Oh potatoes and molasses If you want some, oh just ask us. They'\''re warm and soft like puppies and socks. Filled with cream and candy rocks."]}'
 # Then ask for the last generated wav
 # curl --location --request GET 'localhost:5000/lastGeneratedWav'
 
