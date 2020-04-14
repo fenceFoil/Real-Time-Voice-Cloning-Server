@@ -12,7 +12,7 @@ import os
 import shutil
 
 # Set up server
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort,send_file
 app = Flask(__name__)
 
 @app.route("/clone_voices", methods=["POST"])
@@ -113,6 +113,10 @@ def run_voice_cloning():
                                      synthesizer.sample_rate)
             num_generated += 1
             print("\nSaved output as %s\n\n" % fpath)
+            try:
+                return send_file(fpath, attachment_filename='output.wav')
+            except Exception as e:
+                return str(e)
             
             # TODO: Convert to OGG
             
