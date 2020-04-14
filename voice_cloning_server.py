@@ -12,8 +12,12 @@ import os
 import shutil
 
 # Set up server
-from flask import Flask, jsonify, request, abort,send_file
+from flask import Flask, jsonify, request, abort,send_file, send_from_directory
 app = Flask(__name__)
+
+@app.route('/lastGeneratedWav')
+def lastGeneratedWav():
+    return send_from_directory('/output/','output_000.wav')
 
 @app.route("/clone_voices", methods=["POST"])
 def run_voice_cloning():
@@ -25,7 +29,7 @@ def run_voice_cloning():
     messages = request.json["messages"] # array of strings
 
     # Clear destination folder of generated sound files
-    output_path = "output/"
+    output_path = "/output/"
     if os.path.exists(output_path):
         shutil.rmtree(output_path)
     os.mkdir(output_path)
@@ -79,6 +83,7 @@ def run_voice_cloning():
 
     print("Generation loop")
     num_generated = 0
+    fpath = None
     for text in messages:
         try:
             
@@ -113,10 +118,7 @@ def run_voice_cloning():
                                      synthesizer.sample_rate)
             num_generated += 1
             print("\nSaved output as %s\n\n" % fpath)
-            try:
-                return send_file(fpath, attachment_filename='output.wav')
-            except Exception as e:
-                return str(e)
+
             
             # TODO: Convert to OGG
             

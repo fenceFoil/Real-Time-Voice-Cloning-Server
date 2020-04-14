@@ -2,9 +2,10 @@
 # sudo docker build -t voice-clone-service .
 # sudo docker run -it --gpus=all -p 5000:5000 -v $PWD/wavs:/wavs voice-clone-service
 # Puts wavs in wavs folder
-# Call API
+# Call API to generate
 # curl --location --request POST 'localhost:5000/clone_voices' --header 'Content-Type: application/json' --header 'Content-Type: text/plain' --data-raw '{"voiceFile": "/wavs/weapon.wav","messages": ["MAKE ME BUTTER"]}'
-#
+# Then ask for the last generated wav
+# curl --location --request GET 'localhost:5000/lastGeneratedWav'
 
 FROM nvidia/cuda:9.2-base-ubuntu16.04
 # See http://bugs.python.org/issue19846
