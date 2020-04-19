@@ -15,7 +15,21 @@
 2. `sudo docker build -t voice-clone-service:v1 .`
 3. `sudo docker run -it --gpus=all -p 5000:5000 -v $PWD/wavs:/wavs voice-clone-service:v1`
 
-
+## Postman testing collection
+- https://www.getpostman.com/collections/d4eb209f95e412ab7503
+- Request Text to Speech:
+    - ```curl --location --request POST 'localhost:5000/clone_voices' \
+--header 'Content-Type: application/json' \
+--header 'Content-Type: text/plain' \
+--data-raw '{
+	"voiceFile": "/wavs/michael.wav",
+	"messages": ["Oh potatoes and molasses If you want some, oh just ask us.", "They'\''re warm and soft like puppies and socks. Filled with cream and candy rocks."],
+	"low_mem": false
+}'```
+- Request merged output
+    - ```curl --location --request GET 'localhost:5000/getCombinedResult?req_id=fb226e8808fb41cefb2e5648201445e5'```
+- Request individual output file
+    - ```curl --location --request GET 'localhost:5000/getResult?req_id=8a426e6143d46a0ea43a23e4abf7d733&index=0'```
 
 ## ORIGINAL README:
 This repository is an implementation of [Transfer Learning from Speaker Verification to
