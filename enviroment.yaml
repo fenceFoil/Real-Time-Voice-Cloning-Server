@@ -24,6 +24,7 @@ dependencies:
   - pandas
   - requests
   - pyyaml
+  - pydub
   - pillow
   - python>=3.6
   - pip

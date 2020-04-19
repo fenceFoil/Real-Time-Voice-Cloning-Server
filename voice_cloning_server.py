@@ -10,14 +10,46 @@ import torch
 import sys
 import os
 import shutil
+import re
+from pydub import AudioSegment
+import base64
+import hashlib
+## Md5 the request id so that it is a consistent length and is shorter
+#
+#print()
+#####
 
 # Set up server
 from flask import Flask, jsonify, request, abort,send_file, send_from_directory
 app = Flask(__name__)
 
-@app.route('/lastGeneratedWav')
-def lastGeneratedWav():
-    return send_from_directory('/output/','output_000.wav')
+@app.route('/getResult')
+def getResult():
+    index = int(request.args.get('index'))
+    req_id = request.args.get('req_id')
+    return send_from_directory("/output/%s/" % req_id, "output_%03d.wav" % index)
+
+@app.route('/getCombinedResult')
+def getCombinedResult():
+    req_id = request.args.get('req_id')
+    
+    output_path = "/output/%s/" % req_id
+    merged_output = None
+
+    if os.path.exists(output_path):
+        files = [f for f in os.listdir(output_path) if f.startswith("output_") and f.endswith(".wav")]
+        files.sort(key=lambda f: int(''.join(list(filter(str.isdigit, f)))))
+        for file in files:
+            print(file)
+            file_path = os.path.join(output_path, file)
+            sound_segment = AudioSegment.from_wav(file_path)
+            if merged_output is None:
+                merged_output = sound_segment
+            else:
+                merged_output = merged_output + sound_segment
+    merged_output_path = os.path.join(output_path, "merged.wav")
+    merged_output.export(merged_output_path, format="wav")
+    return send_from_directory(output_path, "merged.wav")
 
 @app.route("/clone_voices", methods=["POST"])
 def run_voice_cloning():
@@ -27,12 +59,20 @@ def run_voice_cloning():
     voc_model_fpath = Path("vocoder/saved_models/pretrained/pretrained.pt")
     ref_voice_path = request.json["voiceFile"] # filename like ojo3.wav
     messages = request.json["messages"] # array of strings
+    low_mem = request.json["low_mem"] if "low_mem" in request.json else False # whether to use LowMem Mode
+
+    # Base64 encode the parameters so that we can reference this job in later api calls
+    dataToEncodeAsID = ','.join(messages) + ref_voice_path
+    encodedBytes = base64.b64encode(dataToEncodeAsID.encode("utf-8"))
+    req_id = str(encodedBytes, "utf-8")
+    # Md5 Hash it so that it is a consistent length
+    req_id = hashlib.md5(req_id.encode('utf-8')).hexdigest()
 
     # Clear destination folder of generated sound files
-    output_path = "/output/"
+    output_path = "/output/%s/" % req_id
     if os.path.exists(output_path):
         shutil.rmtree(output_path)
-    os.mkdir(output_path)
+    os.makedirs(output_path)
     
     ## Print some environment information (for debugging purposes)
     print("Running a test of your configuration...\n")
@@ -57,7 +97,7 @@ def run_voice_cloning():
     ## Load the models one by one.
     print("Preparing the encoder, the synthesizer and the vocoder...")
     encoder.load_model(enc_model_fpath)
-    synthesizer = Synthesizer(syn_model_dir.joinpath("taco_pretrained"), low_mem=False)
+    synthesizer = Synthesizer(syn_model_dir.joinpath("taco_pretrained"), low_mem=low_mem)
     vocoder.load_model(voc_model_fpath)
         
     in_fpath = Path(ref_voice_path)
@@ -86,8 +126,6 @@ def run_voice_cloning():
     fpath = None
     for text in messages:
         try:
-            
-            
             ## Generating the spectrogram
             # The synthesizer works in batch, so you need to put your data in a list or numpy array
             texts = [text]
@@ -119,12 +157,9 @@ def run_voice_cloning():
             num_generated += 1
             print("\nSaved output as %s\n\n" % fpath)
 
-            
-            # TODO: Convert to OGG
-            
         except Exception as e:
             print("Caught exception: %s" % repr(e))
             print("Restarting\n")
 
-    return str(num_generated)
+    return req_id
         
